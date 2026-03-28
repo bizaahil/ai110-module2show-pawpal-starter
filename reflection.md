@@ -12,15 +12,21 @@ The three core actions a user should be able to perform in PawPal+ are:
 
 3. **Generate and view a daily plan** — The user triggers the scheduler to produce a prioritized daily schedule. The app displays the resulting plan clearly and explains the reasoning behind the order and selection of tasks.
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+The initial UML design included five classes:
 
-
+- **Owner** — holds the user's name, daily available time, and preferences; responsible for providing scheduling constraints
+- **Pet** — holds the pet's name, species, age, and any special needs; informs the scheduler of pet-specific context
+- **Task** — holds a care task's name, category, duration, priority, and completion status; can be marked complete or edited
+- **Scheduler** — the coordinator; takes an Owner, Pet, and list of Tasks and is responsible for generating and explaining a daily plan
+- **DailyPlan** — the output of the Scheduler; holds the ordered task list, total duration, date, and a natural-language explanation
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+After reviewing the skeleton with AI, two potential issues were identified:
+
+1. **`generate_plan()` had no return type.** It was updated to explicitly return a `DailyPlan` object, making the relationship between `Scheduler` and `DailyPlan` clearer and easier to implement correctly.
+
+2. **`total_duration` on `DailyPlan` is redundant.** It can always be computed by summing `duration_minutes` across `scheduled_tasks`. Storing it separately risks it going out of sync. This will be removed when logic is implemented — `get_summary()` will compute it on the fly instead.
 
 ---
 
