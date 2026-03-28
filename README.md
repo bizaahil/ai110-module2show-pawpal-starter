@@ -37,6 +37,8 @@ Your final app should:
 
 <!-- Add a screenshot of your running Streamlit app here -->
 <!-- <a href="/course_images/ai110/your_screenshot_name.png" target="_blank"><img src='/course_images/ai110/your_screenshot_name.png' width='600'/></a> -->
+<img width="264" height="714" alt="image" src="https://github.com/user-attachments/assets/3f6a481a-06ef-444e-a496-a05cc188122b" />
+
 
 ## Smarter Scheduling
 
