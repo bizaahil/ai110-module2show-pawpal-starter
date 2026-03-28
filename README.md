@@ -31,6 +31,25 @@ Phase 4 added an algorithmic layer to `pawpal_system.py` that makes the schedule
 - **Recurring tasks** — Tasks have a `frequency` (`"daily"` or `"weekly"`) and a `due_date`. Calling `Scheduler.mark_task_complete()` marks the task done and automatically creates the next occurrence with an advanced due date using Python's `timedelta`.
 - **Conflict detection** — `Scheduler.detect_conflicts()` scans the scheduled tasks and returns warning messages for any two tasks sharing the same `start_time`, preventing the owner from being double-booked.
 
+## Testing PawPal+
+
+Run the full test suite from the project root:
+
+```bash
+python -m pytest
+```
+
+The tests live in [tests/test_pawpal.py](tests/test_pawpal.py) and cover:
+
+- **Task completion** — `mark_complete()` correctly flips `is_completed` to `True`
+- **Pet task list** — adding a task increases the pet's task count
+- **Sorting correctness** — `sort_by_time()` returns tasks in chronological `HH:MM` order
+- **Recurrence logic** — completing a daily task auto-creates a new task due tomorrow
+- **Conflict detection** — `detect_conflicts()` flags tasks sharing the same `start_time`, and stays silent when times differ
+
+**Confidence level: ⭐⭐⭐⭐ (4/5)**
+The core scheduling behaviors are well covered. The main gap is `generate_plan()` integration tests and edge cases around weekly recurrence and the time-budget cutoff.
+
 ## Getting started
 
 ### Setup
