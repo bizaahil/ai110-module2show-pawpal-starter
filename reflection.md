@@ -39,8 +39,14 @@ After reviewing the skeleton with AI, two potential issues were identified:
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+The conflict detector only flags tasks that share an **exact `start_time` match** (e.g., two tasks both at `"08:00"`). It does not check whether task durations overlap — so a 30-minute task starting at `07:00` and a task starting at `07:15` would not trigger a warning, even though they genuinely collide in real life.
+
+This is a reasonable tradeoff for this scenario because:
+1. **Simplicity** — duration-based overlap detection requires comparing intervals (`start_time` to `start_time + duration`) rather than just string equality, which is significantly more complex to implement and read.
+2. **Good enough for a pet care app** — most pet care tasks (walks, feeding, medication) are thought of as "morning" or "evening" commitments rather than precise clock-scheduled blocks. Exact-time conflicts are the most obvious and actionable to flag.
+3. **Avoids false positives** — a 5-minute medication at 08:00 and a 30-minute walk starting at 08:00 are a real conflict, but a walk ending at 07:30 and medication at 07:45 are fine. Without precise clock handling, interval checks would produce noisy warnings.
+
+A future improvement would be to store tasks as `(start_time, duration)` intervals and use proper overlap detection.
 
 ---
 
