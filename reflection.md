@@ -34,8 +34,13 @@ After reviewing the skeleton with AI, two potential issues were identified:
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler considers three constraints:
+
+1. **Time budget** — the owner's `available_minutes_per_day` acts as a hard cap. Tasks are added greedily until the budget is exhausted; any remaining tasks are dropped for that day regardless of their priority.
+2. **Priority** — tasks are sorted `high → medium → low` before the greedy fill, so urgent tasks (medication, feeding) are always included before optional ones (grooming, enrichment).
+3. **Recurrence / due date** — weekly tasks are only included on their designated day of the week; daily tasks are always included. This prevents a weekly bath from crowding out daily essentials.
+
+The time constraint was treated as the hardest boundary because exceeding it would make the plan unrealistic. Priority was chosen as the primary sort key because a pet owner's first concern is not missing critical care, not optimizing the clock order of tasks.
 
 **b. Tradeoffs**
 
@@ -54,13 +59,20 @@ A future improvement would be to store tasks as `(start_time, duration)` interva
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+AI was used across every phase of the project:
+
+- **Design brainstorming** — asked AI to review the initial UML and flag any structural issues before writing code. It caught the missing return type on `generate_plan()` and the redundant `total_duration` storage.
+- **Implementation** — used AI to write the algorithmic methods (`sort_by_time`, `filter_tasks`, `detect_conflicts`, `next_occurrence`) after describing the desired behavior in plain English.
+- **Refactoring** — asked AI how to simplify `filter_tasks`'s pet-lookup loop into a set comprehension; evaluated the tradeoff between conciseness and readability before accepting the change.
+- **Test generation** — asked AI to draft tests for sorting, recurrence, and conflict detection, then read each test carefully to verify it was testing the right thing before keeping it.
+
+The most effective prompts were specific and gave context: *"Here is the method, here is what it should do, here is the edge case I'm worried about — how would you implement or test this?"*
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+When AI suggested using `filter_tasks` with a nested comprehension, the initial version collapsed the pet-name lookup into a single dense line. The logic was correct, but the readability tradeoff was real — a four-line loop with a comment is easier for a new reader to follow than a two-level list comprehension. The simplified version was kept because it was short enough to remain readable, but the decision was made deliberately rather than just accepting the "more Pythonic" suggestion automatically.
+
+Verification was done by running the existing tests after every refactor to confirm behavior didn't change, and by tracing through the logic manually for the edge cases (empty task list, task not found by name).
 
 ---
 
@@ -68,13 +80,20 @@ A future improvement would be to store tasks as `(start_time, duration)` interva
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+Six behaviors were tested:
+
+1. `mark_complete()` flips `is_completed` to `True`
+2. Adding a task to a `Pet` increases its task count
+3. `sort_by_time()` returns tasks in correct chronological order when given out-of-order input
+4. Completing a daily task creates a new task with `due_date = today + 1 day`
+5. Two tasks at the same `start_time` trigger a conflict warning
+6. Tasks at different `start_time` values produce no warning
+
+These were the most important because they cover the three new algorithmic features added in Phase 4 — sorting, recurrence, and conflict detection — which are the behaviors most likely to have subtle bugs (off-by-one dates, wrong string comparisons, false positives in conflict detection).
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+Confidence: **4 out of 5**. The core behaviors are verified and the edge cases for each individual method are covered. The gap is end-to-end `generate_plan()` integration tests — for example, verifying that a weekly task is correctly excluded on the wrong day of the week, or that the plan handles an owner with zero available minutes. Those would be the next tests to add.
 
 ---
 
@@ -82,12 +101,12 @@ A future improvement would be to store tasks as `(start_time, duration)` interva
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+The algorithmic layer came together cleanly. Each method (`sort_by_time`, `filter_tasks`, `detect_conflicts`, `mark_task_complete`) is small, focused, and independently testable. The decision to keep `next_occurrence()` on the `Task` class and `mark_task_complete()` on the `Scheduler` kept responsibilities clearly separated — Task knows how to copy itself forward in time, Scheduler knows where to put the copy.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+The conflict detection is the weakest part of the system. Checking for exact `start_time` matches is fast and simple but misses real overlaps (a 30-minute walk at 07:00 and a task at 07:20 won't be flagged). A future iteration would represent each task as a time interval and use proper overlap detection. The UI would also benefit from a drag-to-reorder task list rather than a dropdown to pick which task to complete.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+The most important thing learned was that AI is a powerful collaborator for *implementation* but a weak one for *design decisions*. AI will generate correct code quickly, but it doesn't know which tradeoffs matter for your specific context. Every time AI suggested a "more Pythonic" version, the question wasn't "is this correct?" — it was "is this the right level of complexity for this project?" That judgment always had to come from the human. The lead architect role isn't about writing code — it's about deciding what the code should be.

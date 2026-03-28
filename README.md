@@ -22,6 +22,22 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Features
+
+- **Multi-pet support** — manage tasks for multiple pets under one owner profile
+- **Priority scheduling** — high-priority tasks are always scheduled first within the daily time budget
+- **Sorting by time** — tasks are displayed in chronological order using their `HH:MM` start time
+- **Filtering** — view tasks by pet name or completion status (pending / completed)
+- **Daily recurrence** — completing a daily task auto-creates the next occurrence for tomorrow
+- **Weekly recurrence** — weekly tasks repeat on a chosen day; completing one schedules the next in 7 days
+- **Conflict warnings** — the scheduler flags any two tasks sharing the same start time so the owner isn't double-booked
+- **Plain-language reasoning** — every generated plan includes an explanation of why tasks were chosen
+
+## Demo
+
+<!-- Add a screenshot of your running Streamlit app here -->
+<!-- <a href="/course_images/ai110/your_screenshot_name.png" target="_blank"><img src='/course_images/ai110/your_screenshot_name.png' width='600'/></a> -->
+
 ## Smarter Scheduling
 
 Phase 4 added an algorithmic layer to `pawpal_system.py` that makes the scheduler more intelligent:

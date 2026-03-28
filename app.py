@@ -94,7 +94,7 @@ else:
     with col_f2:
         filter_status = st.selectbox("Show by status", ["All", "Pending", "Completed"], key="filter_status")
 
-    # Show current tasks with filters applied
+    # Show current tasks with filters applied, sorted by start_time
     scheduler_preview = Scheduler(st.session_state.owner)
     all_tasks = st.session_state.owner.get_all_tasks()
     filtered = scheduler_preview.filter_tasks(
@@ -102,19 +102,38 @@ else:
         pet_name=filter_pet if filter_pet != "All" else None,
         status=filter_status.lower() if filter_status != "All" else None,
     )
+    filtered = scheduler_preview.sort_by_time(filtered)
+
     if filtered:
-        st.write("Current tasks:")
+        st.write("Current tasks (sorted by start time):")
         st.table([
             {
                 "Task": t.name,
+                "Start": t.start_time,
                 "Duration (min)": t.duration_minutes,
                 "Priority": t.priority,
                 "Time Slot": t.time_slot,
                 "Frequency": t.frequency,
-                "Done": t.is_completed,
+                "Done": "✅" if t.is_completed else "⬜",
             }
             for t in filtered
         ])
+
+        # Mark complete buttons
+        st.markdown("**Mark a task complete:**")
+        incomplete = [t for t in all_tasks if not t.is_completed]
+        if incomplete:
+            task_to_complete = st.selectbox(
+                "Select task", [t.name for t in incomplete], key="complete_select"
+            )
+            if st.button("Mark complete"):
+                next_task = scheduler_preview.mark_task_complete(task_to_complete)
+                if next_task:
+                    st.success(f"'{task_to_complete}' done! Next occurrence scheduled for {next_task.due_date}.")
+                else:
+                    st.success(f"'{task_to_complete}' marked complete.")
+        else:
+            st.info("All tasks are complete!")
     else:
         st.info("No tasks match the current filter.")
 
